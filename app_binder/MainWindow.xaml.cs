@@ -63,6 +63,11 @@ namespace AppBinder
             cw.Show();
         }
 
+        private void button_run_Click(object sender, RoutedEventArgs e)
+        {
+            (dataGrid_config.SelectedItem as ProcessRunner)?.start(true);
+        }
+
         private void button_delete_Click(object sender, RoutedEventArgs e)
         {
             if (configs.Count < 1 || dataGrid_config.SelectedIndex < 0) return;

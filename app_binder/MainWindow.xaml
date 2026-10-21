@@ -17,6 +17,7 @@
         </DataGrid>
         <Button x:Name="button_add" Content="Add" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="75" Click="button_add_Click" TabIndex="10"/>
         <Button x:Name="button_edit" Content="Edit" HorizontalAlignment="Left" Margin="99,10,0,0" VerticalAlignment="Top" Width="75" Click="button_edit_Click" TabIndex="20"/>
+        <Button x:Name="button_run" Content="Run" HorizontalAlignment="Left" Margin="188,10,0,0" VerticalAlignment="Top" Width="75" Click="button_run_Click" TabIndex="25" IsEnabled="{Binding SelectedItem.can_run.Value, ElementName=dataGrid_config, FallbackValue=False}"/>
         <Button x:Name="button_delete" Content="Delete" HorizontalAlignment="Left" Margin="318,10,0,0" VerticalAlignment="Top" Width="75" Click="button_delete_Click" TabIndex="40"/>
     </Grid>
 </mah:MetroWindow>

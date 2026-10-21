@@ -129,6 +129,8 @@ namespace AppBinder
         public ReactiveProperty<bool> is_enable { get; } = new ReactiveProperty<bool>();
         public ReactiveProperty<string> config_name { get; } = new ReactiveProperty<string>();
         public ReactiveProperty<string> status { get; } = new ReactiveProperty<string>();
+        // false while waiting startup delay or binding process is running
+        public ReactiveProperty<bool> can_run { get; } = new ReactiveProperty<bool>(true);
 
         // Others
         public Process binding_process;
@@ -218,24 +220,36 @@ namespace AppBinder
                 status.Value = "Waiting Trigger Process...";
             }
         }
-        public async void start()
+        public async void start(bool immediate = false)
         {
+            if (!can_run.Value) return;
+            can_run.Value = false;
             bool success = false;
             try
             {
                 status.Value = "Waiting Startup Delay";
-                await Task.Delay(start_delay);
-                if (status.Value == "Waiting Startup Delay") success = binding_process.Start();
-                else return;
+                if (!immediate)
+                {
+                    await Task.Delay(start_delay);
+                    if (PC.get_number_of_process() == 0)
+                    {
+                        status.Value = "Waiting Trigger Process...";
+                        can_run.Value = true;
+                        return;
+                    }
+                }
+                success = binding_process.Start();
             }
             catch (Exception e)
             {
                 status.Value = e.Message;
+                can_run.Value = true;
                 return;
             }
             if (success) status.Value = "Running";
             else
             {
+                can_run.Value = true;
                 var p = System.Diagnostics.Process.GetProcessesByName(binding_process.ProcessName);
                 Console.WriteLine($"Process:{p.Length}");
                 if (p.Length > 0) status.Value = "Reused a process";
@@ -245,6 +259,7 @@ namespace AppBinder
 
         private void proc_Exited(object sender, EventArgs e)
         {
+            can_run.Value = true;
             if (binding_process.ExitCode != 0)
             {
                 status.Value = $"Fault Detected:{binding_process.ExitCode}";
@@ -302,6 +317,7 @@ namespace AppBinder
                 is_enable?.Dispose();
                 config_name?.Dispose();
                 status?.Dispose();
+                can_run?.Dispose();
                 binding_process?.Dispose();
                 PC?.Dispose();
             }
